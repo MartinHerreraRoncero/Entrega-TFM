@@ -68,6 +68,9 @@ Entrega-TFM/
 │   ├── explainability/
 │   └── api/
 │
+├── reports/
+│   └── figures/
+│
 └── config/
     └── production.json
 ```
