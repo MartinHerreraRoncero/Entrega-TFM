@@ -8,7 +8,6 @@ Entrega-TFM/
 ├── verificar_entorno.py
 ├── run_api.bat
 ├── run_api.sh
-├── diagrama_flujo_interactivo.html
 │
 ├── notebooks/
 │   ├── 01_EDA_FE.ipynb
@@ -68,9 +67,6 @@ Entrega-TFM/
 │   ├── evaluation/
 │   ├── explainability/
 │   └── api/
-│
-├── reports/
-│   └── figures/
 │
 └── config/
     └── production.json
