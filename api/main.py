@@ -30,6 +30,7 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException, Request, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 # ---------------------------------------------------------------------------
 # Resolución Dinámica de Rutas Relativas a ENTREGABLE_DIR
@@ -69,6 +70,7 @@ MODELS_DIR = ENTREGABLE_DIR / "models"
 LOGS_DIR = ENTREGABLE_DIR / "logs"
 STATIC_DIR = API_DIR / "static"
 DASHBOARD_HTML_PATH = STATIC_DIR / "dashboard.html"
+FLOWCHART_HTML_PATH = ENTREGABLE_DIR / "diagrama_flujo_interactivo.html"
 
 # Configuración por defecto
 config = {
@@ -262,6 +264,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Servir figuras y reportes para el Diagrama de Flujo Interactivo y Cockpit
+REPORTS_DIR = ENTREGABLE_DIR / "reports"
+if REPORTS_DIR.exists():
+    app.mount("/reports", StaticFiles(directory=str(REPORTS_DIR)), name="reports")
+
 
 
 FEATURE_HUMAN_LABELS = {
@@ -571,8 +579,28 @@ async def serve_dashboard(request: Request, format: Optional[str] = None):
         "default_model": config.get("default_model", "xgboost"),
         "active_models": active_models,
         "scorecard_available": scorecard is not None,
-        "documentation": "/docs"
+        "documentation": "/docs",
+        "flowchart_ui": "/flujo"
     })
+
+
+@app.get("/flujo", response_class=HTMLResponse, tags=["Dashboard GUI & Diagnóstico"])
+async def interactive_flowchart():
+    """
+    Sirve el Diagrama de Flujo Interactivo de Extremo a Extremo del TFM,
+    con visor integrado de las 21 figuras oficiales y Asistente de Pitch (5 Minutos).
+    """
+    if FLOWCHART_HTML_PATH.exists():
+        with open(FLOWCHART_HTML_PATH, "r", encoding="utf-8") as f:
+            return HTMLResponse(
+                content=f.read(),
+                headers={
+                    "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
+            )
+    return HTMLResponse(content="<h1>Diagrama de flujo interactivo no encontrado en diagrama_flujo_interactivo.html</h1>", status_code=404)
 
 
 @app.get("/health", tags=["Dashboard GUI & Diagnóstico"])
